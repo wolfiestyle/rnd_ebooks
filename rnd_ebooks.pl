@@ -5,6 +5,7 @@ use strict;
 use Regexp::Common qw(URI);
 use Config::Tiny;
 use Net::Twitter;
+use Encode;
 
 # source directory with pdf files
 my $pdf_dir = "$ENV{HOME}/path_to_pdf_files";
@@ -28,7 +29,7 @@ my $pdf_selected = $pdf_list[rand($#pdf_list+1)];
 print "selected file: $pdf_selected\n";
 
 # extract raw text from pdf file
-my @lines = split "\n", `pdftotext "$pdf_selected" - 2> /dev/null`;
+my @lines = split "\n", decode('utf8', `pdftotext "$pdf_selected" - 2> /dev/null`);
 
 sub trim { $_[0] =~ s/^\s+//; $_[0] =~ s/\s+$//; $_[0]; }
 
