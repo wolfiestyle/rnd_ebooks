@@ -29,7 +29,7 @@ my $pdf_selected = $pdf_list[int(rand($#pdf_list+1))];
 print "selected file: $pdf_selected\n";
 
 # get page count
-my $page_count = (split ' ', `pdfinfo "$pdf_selected" | grep Pages`)[1];
+my (undef, $page_count) = split ' ', `pdfinfo "$pdf_selected" | grep Pages`;
 
 # select a random page
 my $sel_page = int(rand($page_count)) + 1;
