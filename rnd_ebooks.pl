@@ -16,12 +16,10 @@ my $pdf_dir = "$ENV{HOME}/path_to_pdf_files";
 my $config = Config::Tiny->read("$ENV{HOME}/.rnd-ebooks")
     or die("error reading config: " . Config::Tiny->errstr . "\n");
 
-sub cfg_read { $config->{connect_params}->{$_[0]} or die("invalid config: missing $_[0]\n"); }
-
-my $consumer_key = cfg_read('consumer_key');
-my $consumer_secret = cfg_read('consumer_secret');
-my $access_token_key = cfg_read('access_token_key');
-my $access_token_secret = cfg_read('access_token_secret');
+foreach (qw/consumer_key consumer_secret access_token_key access_token_secret/)
+{
+    die("invalid config: missing $_\n") unless ($config->{connect_params}->{$_});
+}
 
 # pick a random pdf file
 my @pdf_list = glob "$pdf_dir/*.pdf";
@@ -63,9 +61,9 @@ print "   final line: $line_selected\n";
 # tweet it
 my $api = Net::Twitter->new(
     traits => [qw/OAuth API::REST/],
-    consumer_key => $consumer_key,
-    consumer_secret => $consumer_secret,
-    access_token => $access_token_key,
-    access_token_secret => $access_token_secret,
+    consumer_key => $config->{connect_params}->{consumer_key},
+    consumer_secret => $config->{connect_params}->{consumer_secret},
+    access_token => $config->{connect_params}->{access_token_key},
+    access_token_secret => $config->{connect_params}->{access_token_secret},
 );
 $api->update($line_selected);
