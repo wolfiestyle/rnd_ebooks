@@ -28,8 +28,15 @@ my @pdf_list = glob "$pdf_dir/*.pdf";
 my $pdf_selected = $pdf_list[int(rand($#pdf_list+1))];
 print "selected file: $pdf_selected\n";
 
+# get page count
+my $page_count = (split ' ', `pdfinfo "$pdf_selected" | grep Pages`)[1];
+
+# select a random page
+my $sel_page = int(rand($page_count)) + 1;
+print "selected page: $sel_page / $page_count\n";
+
 # extract raw text from pdf file
-my @lines = split "\n", decode('utf8', `pdftotext "$pdf_selected" - 2> /dev/null`);
+my @lines = split "\n", decode('utf8', `pdftotext -f $sel_page -l $sel_page "$pdf_selected" - 2> /dev/null`);
 
 sub trim { $_[0] =~ s/^\s+//; $_[0] =~ s/\s+$//; $_[0]; }
 
