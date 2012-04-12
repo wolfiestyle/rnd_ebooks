@@ -6,6 +6,7 @@ use Regexp::Common qw(URI);
 use Config::Tiny;
 use Net::Twitter;
 use Encode;
+use IPC::System::Simple qw(capture);
 
 # source directory with pdf files
 my $pdf_dir = "$ENV{HOME}/path_to_pdf_files";
@@ -27,14 +28,15 @@ my $pdf_selected = $pdf_list[int(rand($#pdf_list+1))];
 print "selected file: $pdf_selected\n";
 
 # get page count
-my (undef, $page_count) = split ' ', `pdfinfo "$pdf_selected" | grep Pages`;
+my ($tmp) = grep /Pages/, capture('/usr/bin/pdfinfo', $pdf_selected);
+my (undef, $page_count) = split ' ', $tmp;
 
 # select a random page
 my $sel_page = int(rand($page_count)) + 1;
 print "selected page: $sel_page / $page_count\n";
 
 # extract raw text from pdf file
-my @lines = split "\n", decode('utf8', `pdftotext -f $sel_page -l $sel_page "$pdf_selected" - 2> /dev/null`);
+my @lines = capture('/usr/bin/pdftotext', '-f', $sel_page, '-l', $sel_page, $pdf_selected, '-');
 
 sub trim { $_[0] =~ s/^\s+//; $_[0] =~ s/\s+$//; $_[0]; }
 
@@ -43,7 +45,7 @@ my $line_selected;
 my $i = 0;
 do
 {
-    $line_selected = trim($lines[int(rand($#lines+1))]);
+    $line_selected = trim(decode('utf8', $lines[int(rand($#lines+1))]));
     if ($line_selected =~ m/$RE{URI}{HTTP}/) { ++$i; next; }    # skip lines with URL's (to prevent spam)
     die("couldn't find a line") if (++$i > 100);                # file might have no text (image-only pdf)
 } while (length($line_selected) < 3);
