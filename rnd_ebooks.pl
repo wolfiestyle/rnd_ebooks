@@ -25,7 +25,7 @@ my $access_token_secret = cfg_read('access_token_secret');
 
 # pick a random pdf file
 my @pdf_list = glob "$pdf_dir/*.pdf";
-my $pdf_selected = $pdf_list[rand($#pdf_list+1)];
+my $pdf_selected = $pdf_list[int(rand($#pdf_list+1))];
 print "selected file: $pdf_selected\n";
 
 # extract raw text from pdf file
@@ -38,7 +38,7 @@ my $line_selected;
 my $i = 0;
 do
 {
-    $line_selected = trim($lines[rand($#lines+1)]);
+    $line_selected = trim($lines[int(rand($#lines+1))]);
     if ($line_selected =~ m/$RE{URI}{HTTP}/) { ++$i; next; }    # skip lines with URL's (to prevent spam)
     die("couldn't find a line") if (++$i > 100);                # file might have no text (image-only pdf)
 } while (length($line_selected) < 3);
